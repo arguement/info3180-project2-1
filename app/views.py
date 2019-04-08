@@ -1,0 +1,90 @@
+from app import app, db 
+from datetime import date
+from flask import render_template, request, redirect, url_for, flash, jsonify
+from flask_login import login_user, logout_user, current_user, login_required
+from app.forms import loginform
+from app.models import *
+from werkzeug.security import check_password_hash
+from werkzeug.utils import secure_filename
+from app.forms import registerform
+import psycopg2 
+import random 
+import os   
+import json 
+from werkzeug.utils import secure_filename 
+
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def index(path):
+    """
+    Because we use HTML5 history mode in vue-router we need to configure our
+    web server to redirect all routes to index.html. Hence the additional route
+    "/<path:path".
+
+    Also we will render the initial webpage and then let VueJS take control.
+    """
+    return render_template('index.html')
+
+@app.route('/<file_name>.txt')
+def send_text_file(file_name):
+    """Send your static text file."""
+    file_dot_text = file_name + '.txt'
+    return app.send_static_file(file_dot_text)
+
+@app.after_request
+def add_header(response):
+    """
+    Add headers to both force latest IE rendering engine or Chrome Frame,
+    and also tell the browser not to cache the rendered page. If we wanted
+    to we could change max-age to 600 seconds which would be 10 minutes.
+    """
+    response.headers['X-UA-Compatible'] = 'IE=Edge,chrome=1'
+    response.headers['Cache-Control'] = 'public, max-age=0'
+    return response
+
+def form_errors(form):
+    error_messages = []
+    """Collects form errors"""
+    for field, errors in form.errors.items():
+        for error in errors:
+            message = u"Error in the %s field - %s" % (
+                    getattr(form, field).label.text,
+                    error
+                )
+            error_messages.append(message)
+
+    return error_messages
+
+
+
+@app.route('/api/users/register',methods=['POST']) 
+def register(): 
+    form=registerform() 
+    if request.method == 'POST' and form.validate_on_submit(): 
+        username=request.form['username']
+        password=hash(request.form['password']) 
+        password=str(password)
+        firstname=request.form['firstname']
+        lastname=request.form['lastname']
+        email=request.form['email']
+        location=request.form['location']
+        biography=request.form['biography']
+        profile_picture=form.profile_picture.data 
+        filename=secure_filename(profile_picture.filename)
+        profile_picture.save(os.path.join(app.config['UPLOAD_FOLDER'],filename))
+        join_on=date.today()
+        newuser=users(username,password,firstname,lastname,email,location,biography,filename,join_on)
+        db.session.add(newuser)
+        db.session.commit() 
+        return jsonify({"message": "new user success fully made","password":password,"biography":biography})  
+    
+    
+    errors=form_errors(form) 
+    return jsonify({"errors":errors})
+
+@app.route('/api/auth/login',methods=['POST'])
+def login():
+    form=loginform 
+    if request.method =='POST' and form.validate_on_submit(): 
+        username=form.username.data
+         
