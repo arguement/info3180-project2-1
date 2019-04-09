@@ -68,7 +68,7 @@ const Login =Vue.component('Login',{
     <div>
     <h2>Login</h2>
     <div class="jumbotron"> 
-    <form id="loginform" action="'/api/auth/login" method="POST" enctype = "multipart/form-data" @submit.prevent="">
+    <form id="loginform" action="/api/auth/login" method="POST" enctype = "multipart/form-data" @submit.prevent="loginuser">
     <div>
     <label>username</label> 
     </div>
@@ -89,7 +89,34 @@ const Login =Vue.component('Login',{
     </div> 
     </div> 
     </div>
-    `
+    `,
+    methods:{ loginuser:function(){
+       let loginform=document.getElementById("loginform")
+       let form_data = new FormData(loginform)
+       fetch("/api/auth/login",{
+           method: 'POST', 
+                 body:form_data, 
+                 headers:{ 
+                     'X-CSRFToken':token
+                     }, 
+                    credentials:'same-origin'
+             
+       }) 
+    
+             .then(function (response){
+                 return response.json();
+             }) 
+             .then(function(jsonResponse){
+                 let information=jsonResponse
+                 console.log(information);
+                 
+             })
+             .catch(function(error){
+                console.log(error) 
+             });
+   }
+       
+   }
 })
 
 const newpost= Vue.component('newpost',{
@@ -113,9 +140,7 @@ const newpost= Vue.component('newpost',{
     
     </div>
     `, 
-   methods:{
-       
-   }
+   
 }) 
 
 const register=Vue.component('register',{
@@ -198,8 +223,9 @@ const register=Vue.component('register',{
                  return response.json();
              }) 
              .then(function(jsonResponse){
-                 information=jsonResponse
-                 console.log(information);
+                 let information=jsonResponse
+                 console.log(information); 
+                 this.$router.push("/")
              })
              .catch(function(error){
                 console.log(error) 

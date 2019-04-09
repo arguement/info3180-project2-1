@@ -16,4 +16,8 @@ class registerform(FlaskForm):
     email=StringField('email',validators=[DataRequired(),Email()]) 
     Location=StringField('location',validators=[DataRequired()]) 
     biography=TextAreaField('biography',validators=[DataRequired()]) 
-    profile_picture=FileField('profile_picture',validators=[FileRequired(),FileAllowed(['jpg','png','Images only!'])])
+    profile_picture=FileField('profile_picture',validators=[FileRequired(),FileAllowed(['jpg','png','Images only!'])])  
+    
+class newpost(FlaskForm):
+    photo=FileField('photo',validators=[FileRequired(),FileAllowed(['jpg','png','Images only'])])
+    caption=TextAreaField('caption',validators=[DataRequired()])

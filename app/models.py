@@ -1,5 +1,7 @@
 from . import db 
 
+#makes the database 
+
 class posts(db.Model):
     __tablename__="posts" 
     
