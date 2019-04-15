@@ -114,7 +114,10 @@ def logout():
 @login_required
 def get_id():
     id=current_user.id
-    return jsonify({"id":id})
+    username=current_user.username
+    location=current_user.location 
+    biography=current_user.biography
+    return jsonify({"id":id,"username":username,"location":location,"biography":biography,"firstname":current_user.firstname,"lastname":current_user.lastname,"profile_picture":current_user.profile_picture})
 
 @app.route('/api/users/user_id/posts',methods=['POST'])
 @login_required 

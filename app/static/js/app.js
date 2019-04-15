@@ -362,7 +362,47 @@ const explore=Vue.component('explore',{
              
          }
 })
-
+ 
+ const my_profile =Vue.component('my_profile',{
+     template:`
+     <div class="d-flex justify-content-center">
+     <div class="jumbotron">
+     <div class="d-flex justify-content-center">
+        <div class="p-2 bg"> 
+        <img class="rounded" v-bind:src="'static/uploads/' + user_info.profile_picture"/>
+        </div>
+        <div class="p-2 bg">
+        <h5>{{user_info.firstname}} {{user_info.lastname}}</h5>
+        <p>member since</p>
+        <p>{{user_info.biography}}</p>  
+        <div>
+        <button id="register" class="btn btn-success" >Follow</button> 
+        
+        </div>
+        </div>
+        </div>
+        </div>
+     </div>
+     `,
+     created:function(){
+         let self=this 
+         fetch("/api/current_user")
+         .then(function(response){
+             return response.json();
+         }) 
+         .then(function(data){
+             console.log(data)
+             self.user_info=data
+         })
+         
+     },
+     data:function(){
+         let self= this
+         return{
+             user_info:{}
+         }
+     }
+ })
 
 const NotFound = Vue.component('not-found', {
     template: `
@@ -388,7 +428,8 @@ const router = new VueRouter({
         {path:"/register",component:register},
         {path:"/login",component:Login},
         {path:"/logout",component:logout},
-        {path:"/explore",component:explore},
+        {path:"/explore",component:explore}, 
+        {path:"/my_profile",component:my_profile},
         
         // This is a catch all route in case none of the above matches
         {path: "*", component: NotFound} 
