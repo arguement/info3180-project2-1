@@ -19,5 +19,5 @@ class registerform(FlaskForm):
     profile_picture=FileField('profile_picture',validators=[FileRequired(),FileAllowed(['jpg','png','Images only!'])])  
     
 class newpost(FlaskForm):
-    photo=FileField('photo',validators=[FileRequired(),FileAllowed(['jpg','png','Images only'])])
-    caption=TextAreaField('caption',validators=[DataRequired()])
+    photo=FileField("photo",validators=[FileRequired(),FileAllowed(['jpg','png','Images only'])])
+    caption=TextAreaField("caption",validators=[DataRequired()])

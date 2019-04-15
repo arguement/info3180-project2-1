@@ -10,7 +10,7 @@ app.config['SECRET_KEY'] = "thisisasecret"
 app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://project2:password123@localhost/project2"#this is what will give acess to the database
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True # added just to suppress a warning 
 app.config['UPLOAD_FOLDER']="./app/static/uploads"#this is where the profile pictures will be uploaded 
-app.config['POSTS']="./app/static/photos"#this is where the potho that are posted will go 
+app.config['PHOTOS']="./app/static/photos"#this is where the potho that are posted will go 
 
 db = SQLAlchemy(app)
 #login mangement 

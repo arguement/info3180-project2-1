@@ -2,7 +2,7 @@
 Vue.component('app-header', {
     template: `
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
-      <a class="navbar-brand" href="#">Photogram</a>
+      <a class="navbar-brand" href="/">Photogram</a>
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
@@ -12,7 +12,12 @@ Vue.component('app-header', {
           <li class="nav-item active">
             <router-link class="nav-link" to="/">Home <span class="sr-only">(current)</span></router-link>
           </li>  
-          
+          <li class="nav-item active">
+            <router-link class="nav-link" to="/explore">Explore <span class="sr-only">(current)</span></router-link>
+          </li>  
+          <li class="nav-item active">
+            <router-link class="nav-link" to="/logout">Logout <span class="sr-only">(current)</span></router-link>
+          </li>  
         </ul>
       </div>
     </nav>
@@ -36,7 +41,7 @@ const Home = Vue.component('home', {
     <div class="jumbotron">
         <div class="d-flex justify-content-center">
         <div class="p-2 bg"> 
-        <img   src="/app/templates/pic.jpg" alt="the most basic pic of people smiling i could find if i get copy righted oww well" />
+        <img   src="/static/pic.jpg" alt="the most basic pic of people smiling i could find if i get copy righted oww well" class="img-thumbnail" />
         </div>
         <div class="p-2 bg">
         <h1>Photogram</h1> 
@@ -60,7 +65,9 @@ const Home = Vue.component('home', {
             
         }
     }
-}); 
+});  
+
+ 
 
 const Login =Vue.component('Login',{
     template:`
@@ -90,7 +97,17 @@ const Login =Vue.component('Login',{
     </div> 
     </div>
     `,
+    created:function(){
+        let self=this
+    },
+    data:function(){
+        return {
+            current_user:0
+        }
+    }
+    ,
     methods:{ loginuser:function(){
+       let self = this;
        let loginform=document.getElementById("loginform")
        let form_data = new FormData(loginform)
        fetch("/api/auth/login",{
@@ -108,8 +125,11 @@ const Login =Vue.component('Login',{
              }) 
              .then(function(jsonResponse){
                  let information=jsonResponse
-                 console.log(information);
-                 
+                // console.log(information);
+                current_user=information
+                console.log(information.user_id)
+                self.current_user=information.user_id 
+                console.log(self.current_user)
              })
              .catch(function(error){
                 console.log(error) 
@@ -125,8 +145,10 @@ const newpost= Vue.component('newpost',{
     <div> 
     <h2>New Post</h2> 
     <div class="jumbotron"> 
+    <form id="postform" name="postform" action="/api/users/user_id/posts" method="POST" enctype = "multipart/form-data" @submit.prevent="newpost"> 
     <p>Photo</p>
-    <input id="Photo" type="file" name="Photo" accept="image/*">
+    <input id="photo" type="file" name="photo" accept="image/*">
+    
     <div class="d-flex flex-column">
     <p>Caption</p>
     <textarea id="caption" name="caption" ></textarea> 
@@ -134,14 +156,74 @@ const newpost= Vue.component('newpost',{
     <div class="d-flex flex-column"> 
     <p></p>
     <button type="submit" name="submit" class="btn btn-primary">POST</button> 
-    </div>
+    </div> 
+    </form>
     </div>
     </div>
     
     </div>
-    `, 
-   
-}) 
+    `,
+    data:function(){
+        return{
+            user_id:0
+        }
+    },
+    methods:{newpost:function(){ 
+        let self = this; 
+        let postform=document.getElementById("postform");
+        let form_data = new FormData(postform);
+        fetch("/api/users/user_id/posts",{
+            method: 'POST', 
+                 body:form_data, 
+                 headers:{ 
+                     'X-CSRFToken':token
+                     }, 
+                    credentials:'same-origin'
+            
+        })
+        .then(function (response){
+        return response.json();
+             }) 
+             .then(function(jsonResponse){
+                 let information=jsonResponse
+                 console.log(information);
+                 
+             })
+             .catch(function(error){
+                console.log(error) 
+             });
+   }
+       
+   }
+}) ;
+const logout=Vue.component('logout',{
+    template:`
+    <div class="d-flex justify-content-center"> 
+    <h2>logout</h2> 
+    <div class="jumbotron">
+    <p>{{message}}</p>
+    </div>
+    </div>
+    `,
+    
+    created:function(){
+        let self=this 
+        fetch('/api/auth/logout') 
+        .then(function(response){
+            return response.json();
+        }) 
+        .then(function(data){
+            console.log(data);
+            self.message=data.message
+        });
+    },
+    
+    data:function(){
+        return{
+            message:''
+        }
+    }
+})
 
 const register=Vue.component('register',{
     template:`
@@ -206,7 +288,7 @@ const register=Vue.component('register',{
     </div> 
     </div>
     </div>
-    `, 
+    `,
     methods:{ 
         registerperson:function(){
             let registerform= document.getElementById("registerform") 
@@ -225,7 +307,8 @@ const register=Vue.component('register',{
              .then(function(jsonResponse){
                  let information=jsonResponse
                  console.log(information); 
-                 this.$router.push("/")
+                // this.$router.push("/") 
+                console.log(current_user)
              })
              .catch(function(error){
                 console.log(error) 
@@ -234,6 +317,51 @@ const register=Vue.component('register',{
     }
 }) 
 
+const explore=Vue.component('explore',{
+    template:` 
+    <div class="d-flex justify-content-center"> 
+    <div class="row">
+    <div class=".col-lg-">
+    
+    <div v-for="i in posts" class="jumbotron">
+    <img  class="img-fluid" v-bind:src="'static/photos/' + i.photo"/>
+    <p> {{ i.caption}}</p>
+    <p>{{i.created_on}}</p>
+    </div>
+     
+    </div> 
+    <div class=".col-lg-"> 
+    <button id="upload" class="btn btn-primary" v-on:click="nextpage1" >New Post</button>
+    </div> 
+    </div>
+    </div>
+        `,data:function(){ 
+            let self= this
+            return{
+                
+            posts:[]
+            
+        }},
+        created:function(){ 
+            let self=this
+            fetch("/api/post")
+        .then(function(response){
+            return response.json();
+        }) 
+        .then(function(data){
+            console.log(data); 
+            self.posts=data.posts
+            
+        });
+        },
+         methods:{ 
+        nextpage1:function(event){
+            
+           this.$router.push("/posts/new")
+        }
+             
+         }
+})
 
 
 const NotFound = Vue.component('not-found', {
@@ -259,6 +387,9 @@ const router = new VueRouter({
         {path:"/posts/new",component:newpost}, 
         {path:"/register",component:register},
         {path:"/login",component:Login},
+        {path:"/logout",component:logout},
+        {path:"/explore",component:explore},
+        
         // This is a catch all route in case none of the above matches
         {path: "*", component: NotFound} 
         
@@ -268,5 +399,8 @@ const router = new VueRouter({
 // Instantiate our main Vue Instance
 let app = new Vue({
     el: "#app",
-    router
+    router,
+    data:{
+        current_user:""
+    }
 });

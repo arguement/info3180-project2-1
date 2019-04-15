@@ -3,7 +3,7 @@ from datetime import date
 from flask import render_template, request, redirect, url_for, flash, jsonify
 from flask_login import login_user, logout_user, current_user, login_required
 from app.forms import loginform
-from app.models import *
+from app.models import posts,likes,users,Followers
 from werkzeug.security import check_password_hash
 from werkzeug.utils import secure_filename 
 from werkzeug.security import generate_password_hash
@@ -96,7 +96,7 @@ def login():
         
         if user != None and check_password_hash(user.password, password):
             login_user(user)
-            print(current_user.is_authenticated)
+            print(current_user.id)
             return jsonify({"message":"you are now logged in","user_id":user.id,"usersame":user.username})
         return jsonify({"message":"invalid password and/or username"})  
     
@@ -104,20 +104,72 @@ def login():
     return jsonify({"errors":errors})
 
 @app.route('/api/auth/logout')
-
 @login_required 
 def logout():
-    logout_user 
+    logout_user()
     return jsonify({'message':"you are now logged out"}) 
     
 
-app.route('/api/users/{user_id}/posts',methods=['POST'])
-def newpost(user_id):
+@app.route("/api/current_user")
+@login_required
+def get_id():
+    id=current_user.id
+    return jsonify({"id":id})
+
+@app.route('/api/users/user_id/posts',methods=['POST'])
+@login_required 
+def newpost():
+    user_id=current_user.id
     form=newpost 
-    if request.method=='POST' and form.validate_on_submit():
-        caption=request.form['caption']
+    if request.method=='POST': #and form.validate_on_submit():
         
+        caption=request.form['caption']
+        photo=request.files['photo']
+        filename=secure_filename(photo.filename)
+        photo.save(os.path.join(app.config['PHOTOS'],filename))
+        created_on=date.today() 
+        post=posts(user_id,filename,caption,created_on)
+        db.session.add(post)
+        db.session.commit()
+        return jsonify({"message": "the post was made sucess fully"}) 
+    
+    errors=form_errors(form) 
+    return jsonify({"errors":errors})
     
 @login_maneger.user_loader 
 def load_user(user_id):
-    return users.query.get(user_id)
+    return users.query.get(user_id)  
+
+@app.route('/api/users/<user_id>/posts')
+@login_required 
+def usersposts(user_id):
+    user_posts = posts.query.filter_by(user_id=username) 
+    return jsonify({"posts":user_posts})
+
+
+
+
+@app.route('/api/post')    
+@login_required 
+def allposts():
+    theposts=[]
+    totalpost=db.session.query(posts).all()
+    print(totalpost)
+    for i in totalpost:
+        dic={"user_id":i.user_id,"id":i.id,"caption":i.caption,"photo":i.photo,"created_on":i.created_on}
+        theposts.append(dic)
+        print(dic)
+    return jsonify({"posts":theposts}) 
+
+
+@app.route('/api/posts/<post_id>/like') 
+@login_required 
+def like(post_id): 
+    user_id=current_user.id 
+    newlike=likes(user_id,post_id) 
+    db.session.add(newlike)
+    db.session.commit() 
+    totallikes= likes.query.filter_by(post_id=post_id)
+    num=len(totallikes) 
+    return jsonify({"message":"Post liked!","likes":num}) 
+
