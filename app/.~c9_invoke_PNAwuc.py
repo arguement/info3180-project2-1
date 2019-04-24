@@ -78,7 +78,7 @@ def register():
         newuser=users(username,password,firstname,lastname,email,location,biography,filename,join_on)
         db.session.add(newuser)
         db.session.commit() 
-        return jsonify({"message": "new user success fully made"}) 
+        return jsonify({"message": "new user success fully made","password":password,"biography":biography})  
     
     
     errors=form_errors(form) 
@@ -113,28 +113,11 @@ def logout():
 @app.route("/api/current_user")
 @login_required
 def get_id():
-    photos=[]
     id=current_user.id
     username=current_user.username
     location=current_user.location 
-    biography=current_user.biography 
-    post= posts.query.filter_by(user_id=id)
-    print(post) 
-    for i in post:
-        pic={"pic":i.photo}
-        photos.append(pic)
-    print(photos)
-    return jsonify({"id":id,"username":username,"location":location,"biography":biography,"firstname":current_user.firstname,"lastname":current_user.lastname,"profile_picture":current_user.profile_picture,"join_on":current_user.joined_on,"photos":photos})
-
-
-@app.route("/api/curent_pic")
-@login_required 
-def get_allpost(): 
-    post= posts.query.filter_by(user_id=current_user.id)
-    print(posts)
-    return jsonify({"posts":""})
-    
-
+    biography=current_user.biography
+    return jsonify({"id":id,"username":username,"location":location,"biography":biography,"firstname":current_user.firstname,"lastname":current_user.lastname,"profile_picture":current_user.profile_picture,"join_on":current_user.joined_on})
 
 
 @app.route('/api/users/user_id/posts',methods=['POST'])
@@ -175,34 +158,22 @@ def usersposts(user_id):
 def allposts():
     theposts=[]
     totalpost=db.session.query(posts).all()
-    
     print(totalpost)
     for i in totalpost:
-        total=[]
-        totallikes=likes.query.filter_by(post_id=i.id)
-        #print(totallikes) 
-        for t in totallikes:
-            total.append(t.post_id)
-        alllikes=len(total)
-        dic={"user_id":i.user_id,"id":i.id,"caption":i.caption,"photo":i.photo,"created_on":i.created_on,"likes":alllikes}
+        dic={"user_id":i.user_id,"id":i.id,"caption":i.caption,"photo":i.photo,"created_on":i.created_on}
         theposts.append(dic)
-        #print(dic)
+        print(dic)
     return jsonify({"posts":theposts}) 
 
 
-@app.route('/api/posts/<post_id>/like',methods=['POST']) 
+@app.route('/api/posts/<post_id>/like') 
 @login_required 
 def like(post_id): 
     user_id=current_user.id 
     newlike=likes(user_id,post_id) 
     db.session.add(newlike)
     db.session.commit() 
-    totallikes= likes.query.filter_by(post_id=post_id) 
-    num=[]
-    print(totallikes) 
-    for i in totallikes:
-        num.append(i.user_id)
-    num2=len(num)
-    print(num2)
-    return jsonify({"message":"Post liked!","likes":num2}) 
+    totallikes= likes.query.filter_by(post_id=post_id)
+    num=len(totallikes) 
+    return jsonify({"message":"Post liked!","likes":num}) 
 

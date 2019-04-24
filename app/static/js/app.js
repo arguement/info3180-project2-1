@@ -16,6 +16,9 @@ Vue.component('app-header', {
             <router-link class="nav-link" to="/explore">Explore <span class="sr-only">(current)</span></router-link>
           </li>  
           <li class="nav-item active">
+            <router-link class="nav-link" to="/my_profile">My Profile<span class="sr-only">(current)</span></router-link>
+          </li>  
+          <li class="nav-item active">
             <router-link class="nav-link" to="/logout">Logout <span class="sr-only">(current)</span></router-link>
           </li>  
         </ul>
@@ -90,7 +93,7 @@ const Login =Vue.component('Login',{
     </div> 
     <div class="d-flex flex-column"> 
     <p></p>
-    <button type="submit" name="submit" class="btn btn-success">LOGIN</button> 
+    <button type="submit" name="submit" class="btn btn-success" >LOGIN</button> 
     </div>
     </form>
     </div> 
@@ -127,14 +130,19 @@ const Login =Vue.component('Login',{
                  let information=jsonResponse
                 // console.log(information);
                 current_user=information
-                console.log(information.user_id)
-                self.current_user=information.user_id 
-                console.log(self.current_user)
+                
+                self.current_user=information
+                console.log(current_user)
+                if(current_user.message == "you are now logged in"){ 
+                    console.log("in here")
+                     self.$router.push("/explore")
+                     }
              })
              .catch(function(error){
                 console.log(error) 
              });
-   }
+   } 
+   
        
    }
 })
@@ -184,9 +192,14 @@ const newpost= Vue.component('newpost',{
         .then(function (response){
         return response.json();
              }) 
-             .then(function(jsonResponse){
+             .then(function(jsonResponse){ 
+                 let self=this
                  let information=jsonResponse
-                 console.log(information);
+                 console.log(information.message); 
+                 if (information.message == "the post was made sucess fully"){
+                     this.$router.push("/explore")
+                 }
+                 
                  
              })
              .catch(function(error){
@@ -199,10 +212,14 @@ const newpost= Vue.component('newpost',{
 const logout=Vue.component('logout',{
     template:`
     <div class="d-flex justify-content-center"> 
-    <h2>logout</h2> 
+    <div class="d-flex flex-column">
+    <h2 class="p-2 bg">logout</h2> 
+    <div class="p-2 bg">
     <div class="jumbotron">
     <p>{{message}}</p>
     </div>
+    </div> 
+    </div> 
     </div>
     `,
     
@@ -308,7 +325,8 @@ const register=Vue.component('register',{
                  let information=jsonResponse
                  console.log(information); 
                 // this.$router.push("/") 
-                console.log(current_user)
+                console.log(current_user) 
+                //this.$router.push("/login")
              })
              .catch(function(error){
                 console.log(error) 
@@ -323,10 +341,11 @@ const explore=Vue.component('explore',{
     <div class="row">
     <div class=".col-lg-">
     
-    <div v-for="i in posts" class="jumbotron">
+    <div v-for="(i,index) in posts" class="jumbotron" :key="index">
     <img  class="img-fluid" v-bind:src="'static/photos/' + i.photo"/>
-    <p> {{ i.caption}}</p>
-    <p>{{i.created_on}}</p>
+    <p id="caption" :value=i.caption> {{ i.caption}}</p>
+    <p>{{i.created_on}} {{index}}</p> 
+    <p id="liker" v-on:click="like_post(index)">Heart icon {{i.likes}} likes <span class="glyphicon glyphicon-heart"></span></p>
     </div>
      
     </div> 
@@ -339,7 +358,8 @@ const explore=Vue.component('explore',{
             let self= this
             return{
                 
-            posts:[]
+            posts:[], 
+            post_id:0
             
         }},
         created:function(){ 
@@ -355,12 +375,38 @@ const explore=Vue.component('explore',{
         });
         },
          methods:{ 
+        
         nextpage1:function(event){
-            
+           let self=this 
            this.$router.push("/posts/new")
-        }
+        },
+        like_post:function(index){ 
+            let self=this
+           let post_id=this.posts[index].id 
+           fetch("/api/posts/"+post_id+"/like",{
+                 method: 'POST', 
+                 headers:{ 
+                     'X-CSRFToken':token
+                     }, 
+                    credentials:'same-origin'
+             }) 
+             .then(function (response){
+                 return response.json();
+             }) 
+             .then(function(jsonResponse){
+                 let information=jsonResponse
+                 console.log(information); 
+                  self.posts[index].likes= information.likes;
+               
+             })
+             .catch(function(error){
+                console.log(error) 
+             });
+             
+             }
              
          }
+        
 })
  
  const my_profile =Vue.component('my_profile',{
@@ -369,17 +415,22 @@ const explore=Vue.component('explore',{
      <div class="jumbotron">
      <div class="d-flex justify-content-center">
         <div class="p-2 bg"> 
-        <img class="rounded" v-bind:src="'static/uploads/' + user_info.profile_picture"/>
+        <img class="img-thumbnail" v-bind:src="'static/uploads/' + user_info.profile_picture" style="width:250px;height:250px;"/>
         </div>
         <div class="p-2 bg">
         <h5>{{user_info.firstname}} {{user_info.lastname}}</h5>
-        <p>member since</p>
-        <p>{{user_info.biography}}</p>  
+        <p>member since {{user_info.join_on}}</p>
+        <p>{{user_info.biography}} </p>  
         <div>
-        <button id="register" class="btn btn-success" >Follow</button> 
+        <button id="register" class="btn btn-primary" >Follow</button> 
         
         </div>
-        </div>
+        </div> 
+        
+        </div> 
+        <div v-for= "i in pics" class="card">
+        <img  class="card-img-top" v-bind:src="'static/photos/' + i.pic"/>
+        
         </div>
         </div>
      </div>
@@ -392,14 +443,17 @@ const explore=Vue.component('explore',{
          }) 
          .then(function(data){
              console.log(data)
-             self.user_info=data
+             self.user_info=data 
+             self.pics=data.photos
          })
          
-     },
+     }, 
+     
      data:function(){
          let self= this
          return{
-             user_info:{}
+             user_info:{},
+             pics:[]
          }
      }
  })
