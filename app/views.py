@@ -127,12 +127,21 @@ def get_id():
     return jsonify({"id":id,"username":username,"location":location,"biography":biography,"firstname":current_user.firstname,"lastname":current_user.lastname,"profile_picture":current_user.profile_picture,"join_on":current_user.joined_on,"photos":photos})
 
 
-@app.route("/api/curent_pic")
+@app.route("/api/userinfo/<user_id>")
 @login_required 
-def get_allpost(): 
-    post= posts.query.filter_by(user_id=current_user.id)
-    print(posts)
-    return jsonify({"posts":""})
+def get_allpost(user_id): 
+    info= users.query.filter_by(id=user_id)
+    for i in info:
+         username=i.username
+         #password=db.Column(db.String(200))
+         #firstname=db.Column(db.String(80))
+         #lastname=db.Column(db.String(80))
+         #email=db.Column(db.String(80))
+         #location=db.Column(db.String(80))
+         #biography=db.Column(db.String(2000)) 
+         #profile_picture=db.Column(db.String(100)) 
+         #joined_on=db.Column(db.Date)
+    return jsonify({"name":username})
     
 
 
@@ -161,11 +170,16 @@ def newpost():
 def load_user(user_id):
     return users.query.get(user_id)  
 
-@app.route('/api/users/<user_id>/posts')
+@app.route('/api/users/<id>/posts')
 @login_required 
-def usersposts(user_id):
-    user_posts = posts.query.filter_by(user_id=username) 
-    return jsonify({"posts":user_posts})
+def usersposts(id):
+    allposts=[]
+    user_posts = posts.query.filter_by(user_id=id)
+    print(user_posts)
+    for i in user_posts :
+        dic={"pic":i.photo}
+        allposts.append(dic)
+    return jsonify({"posts":allposts})
 
 
 
@@ -177,7 +191,7 @@ def allposts():
     totalpost=db.session.query(posts).all()
     
     print(totalpost)
-    for i in totalpost:
+    for i in totalpost :
         total=[]
         totallikes=likes.query.filter_by(post_id=i.id)
         #print(totallikes) 

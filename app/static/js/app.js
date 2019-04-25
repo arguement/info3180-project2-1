@@ -152,6 +152,7 @@ const newpost= Vue.component('newpost',{
     <div class="d-flex justify-content-center"> 
     <div> 
     <h2>New Post</h2> 
+    <FlashMessage></FlashMessage>
     <div class="jumbotron"> 
     <form id="postform" name="postform" action="/api/users/user_id/posts" method="POST" enctype = "multipart/form-data" @submit.prevent="newpost"> 
     <p>Photo</p>
@@ -193,11 +194,13 @@ const newpost= Vue.component('newpost',{
         return response.json();
              }) 
              .then(function(jsonResponse){ 
-                 let self=this
+                 
                  let information=jsonResponse
                  console.log(information.message); 
                  if (information.message == "the post was made sucess fully"){
-                     this.$router.push("/explore")
+                     console.log("in here")
+                    //self.$router.push("/explore") 
+                    this.flashMessage.show({status: 'error', title: 'Error Message Title', message: 'Oh, you broke my heart! Shame on you!'})
                  }
                  
                  
@@ -341,7 +344,8 @@ const explore=Vue.component('explore',{
     <div class="row">
     <div class=".col-lg-">
     
-    <div v-for="(i,index) in posts" class="jumbotron" :key="index">
+    <div v-for="(i,index) in posts" class="jumbotron" :key="index" > 
+    <p v-on:click="profile(index)">click here</P>
     <img  class="img-fluid" v-bind:src="'static/photos/' + i.photo"/>
     <p id="caption" :value=i.caption> {{ i.caption}}</p>
     <p>{{i.created_on}} {{index}}</p> 
@@ -382,6 +386,7 @@ const explore=Vue.component('explore',{
         },
         like_post:function(index){ 
             let self=this
+            console.log(index)
            let post_id=this.posts[index].id 
            fetch("/api/posts/"+post_id+"/like",{
                  method: 'POST', 
@@ -403,6 +408,12 @@ const explore=Vue.component('explore',{
                 console.log(error) 
              });
              
+             },
+             profile:function(index){ 
+                  let self=this 
+                 let user_id=this.posts[index].user_id
+                 self.$router.push("/users/"+user_id)
+                 
              }
              
          }
@@ -422,7 +433,7 @@ const explore=Vue.component('explore',{
         <p>member since {{user_info.join_on}}</p>
         <p>{{user_info.biography}} </p>  
         <div>
-        <button id="register" class="btn btn-primary" >Follow</button> 
+        
         
         </div>
         </div> 
@@ -456,6 +467,43 @@ const explore=Vue.component('explore',{
              pics:[]
          }
      }
+ }) 
+ const profile =Vue.component('profile',{
+     template:` 
+     <p>{{id}}</p>
+     `,
+     data:function(){
+         return{
+             id:this.$route.params.user_id,
+             user_info:{},
+             posts:[]
+             
+         }
+     },
+     created:function(){
+         let self=this 
+         fetch("/api/users/"+this.id+"/posts")
+         .then(function(response){
+             return response.json();
+         }) 
+         .then(function(data){
+             console.log(data) 
+             self.posts=data.posts
+             
+         })
+         
+         fetch("/api/userinfo/"+this.id) 
+         .then(function(response){
+             return response.json();
+         }) 
+         .then(function(data2){
+             console.log(data2) 
+             //self.posts=data.posts
+             
+         })
+         
+         
+     },
  })
 
 const NotFound = Vue.component('not-found', {
@@ -484,7 +532,7 @@ const router = new VueRouter({
         {path:"/logout",component:logout},
         {path:"/explore",component:explore}, 
         {path:"/my_profile",component:my_profile},
-        
+        {path:"/users/:user_id",component:profile},
         // This is a catch all route in case none of the above matches
         {path: "*", component: NotFound} 
         
