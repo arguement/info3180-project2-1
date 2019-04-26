@@ -13,7 +13,13 @@ import random
 import os   
 import json 
 from werkzeug.utils import secure_filename 
-from flask_login import LoginManager
+from flask_login import LoginManager   
+
+import jwt
+from flask import _request_ctx_stack
+from functools import wraps
+import base64
+
 
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
@@ -145,7 +151,7 @@ def get_allpost(user_id):
          biography=i.biography 
          profile_picture=i.profile_picture 
          joined_on=i.joined_on
-    return jsonify({"name":username,"firstname":firstname,"lastname":lastname,"location":location,"biography":biography,"profile_picture":profile_picture,"joined_on":joined_on,"followers":num})
+    return jsonify({"name":username,"firstname":firstname,"lastname":lastname,"location":location,"biography":biography,"profile_picture":profile_picture,"joined_on":joined_on,"followers":num,"location":location})
     
 
 
@@ -202,7 +208,8 @@ def allposts():
         for t in totallikes:
             total.append(t.post_id)
         alllikes=len(total)
-        dic={"user_id":i.user_id,"id":i.id,"caption":i.caption,"photo":i.photo,"created_on":i.created_on,"likes":alllikes}
+        name = users.query.get(i.user_id).username
+        dic={"user_id":i.user_id,"id":i.id,"caption":i.caption,"photo":i.photo,"created_on":i.created_on,"likes":alllikes,"username":name}
         theposts.append(dic)
         #print(dic)
     return jsonify({"posts":theposts}) 

@@ -73,7 +73,7 @@ const Home = Vue.component('home', {
  
 
 const Login =Vue.component('Login',{
-    template:`
+    template:`<!--
     <div class="d-flex justify-content-center">
     <div>
     <h2>Login</h2>
@@ -98,6 +98,31 @@ const Login =Vue.component('Login',{
     </form>
     </div> 
     </div> 
+    </div> -->
+    
+    <!-- jordan stuff-->
+     <div>
+    <div class="page-header center">
+                    <h1 class="text-center">Login</h1>      
+    </div>
+    <div class="d-flex justify-content-center">
+                <div class="register-form cus-form-cont"">
+                    <form id="loginform" action="/api/auth/login" method="POST" enctype = "multipart/form-data" @submit.prevent="loginuser">
+                            <div class="form-group "  id="uploadForm">
+                              <label for="exampleInputEmail1">Username</label>
+                              <input type="text" class="form-control" id="username" name="username" aria-describedby="emailHelp" >
+                              
+                            </div>
+                            <div class="form-group">
+                              <label for="password">Password</label>
+                              <input type="password" class="form-control"  id="password" name="password" >
+                            </div>
+                            
+                            
+                            <button type="submit" class="btn btn-success  cus-btn">Login</button>
+                    </form>
+                </div>
+            </div>
     </div>
     `,
     created:function(){
@@ -148,7 +173,7 @@ const Login =Vue.component('Login',{
 })
 
 const newpost= Vue.component('newpost',{
-    template:`
+    template:`<!--
     <div class="d-flex justify-content-center"> 
     <div> 
     <h2>New Post</h2> 
@@ -170,7 +195,31 @@ const newpost= Vue.component('newpost',{
     </div>
     </div>
     
-    </div>
+    </div> -->
+    <!-- jordan stuff -->
+     <div>
+                            <div class="page-header center">
+                                            <h1 class="text-center">New Post</h1>      
+                            </div>
+                            <div class="d-flex justify-content-center">
+                                        <div class="register-form cus-form-cont">
+                                            <form  id="postform" name="postform" action="/api/users/user_id/posts" method="POST" enctype = "multipart/form-data" @submit.prevent="newpost">
+                                                    <div class="form-group " enctype="multipart/form-data" id="uploadForm">
+                                                      <label for="exampleInputEmail1">Photo</label>
+                                                      <input type="file" class="form-control" id="photo" name="photo" accept="image/*" aria-describedby="emailHelp" >
+                                                      
+                                                    </div>
+                                                    <div class="form-group">
+                                                            <label for="bio">Biography</label>
+                                                            <textarea class="form-control"  id="caption" name="caption" rows="3"></textarea>
+                                                    </div>
+                                                    
+                                                    
+                                                    <button type="submit" class="btn btn-success  cus-btn">Submit</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                            </div>
     `,
     data:function(){
         return{
@@ -194,12 +243,12 @@ const newpost= Vue.component('newpost',{
         return response.json();
              }) 
              .then(function(jsonResponse){ 
-                 
+                 console.log("close");
                  let information=jsonResponse
-                 console.log(information.message); 
+                //  console.log(information.message); 
                  if (information.message == "the post was made sucess fully"){
                      console.log("in here")
-                    //self.$router.push("/explore") 
+                    self.$router.push("/explore") 
                     this.flashMessage.show({status: 'error', title: 'Error Message Title', message: 'Oh, you broke my heart! Shame on you!'})
                  }
                  
@@ -340,24 +389,50 @@ const register=Vue.component('register',{
 
 const explore=Vue.component('explore',{
     template:` 
-    <div class="d-flex justify-content-center"> 
-    <div class="row">
-    <div class=".col-lg-">
+   
+    <!-- jordan stuff -->
     
-    <div v-for="(i,index) in posts" class="jumbotron" :key="index" > 
-    <p v-on:click="profile(index)">click here</P>
-    <img  class="img-fluid" v-bind:src="'static/photos/' + i.photo"/>
-    <p id="caption" :value=i.caption> {{ i.caption}}</p>
-    <p>{{i.created_on}} {{index}}</p> 
-    <p id="liker" v-on:click="like_post(index)">Heart icon {{i.likes}} likes <span class="glyphicon glyphicon-heart"></span></p>
-    </div>
-     
-    </div> 
-    <div class=".col-lg-"> 
-    <button id="upload" class="btn btn-primary" v-on:click="nextpage1" >New Post</button>
-    </div> 
-    </div>
-    </div>
+     <div class="d-flex justify-content-center">
+                <div class="left-section">
+
+                        <div class="card posts"  v-for="(i,index) in posts"  :key="index">
+                               <div class="top " v-on:click="profile(index)">
+                                    <p class="text-muted lead" v-on:click="profile(index)"> 
+                                        <div v-on:click="profile(index)" class="post-header-of-username"> <img src="static/images/man.png" alt=""> </div> 
+                                        <span>{{ i.username }}</span>
+                                    </p>
+                               </div>
+                               <div class="middle">
+
+                                <img :src="'static/photos/' + i.photo " alt="">
+
+                               </div>
+                               <div class="bottom">
+                                    <p id="caption" :value=i.caption>{{ i.caption}}</p>
+                               </div>
+                               <div >
+                                    <div class="row">
+                                        <div class="text-muted lead col" > 
+                                                <div  v-on:click="like_post(index)" class="post-header-of-username" id="liker"> <img src="static/images/like.png"  alt=""> </div> 
+                                                {{ i.likes }} likes
+                                        </div>
+
+                                        <div class="col">
+                                            <p >
+                                                {{i.created_on}} {{index}}
+                                            </p>
+                                        </div>
+                                    </div>
+                               </div>
+                         </div>
+
+                </div>
+                <div class="right-section">
+
+                    <button id="upload" class="btn btn-primary" v-on:click="nextpage1" >New Post</button>
+
+                </div>
+            </div>
         `,data:function(){ 
             let self= this
             return{
@@ -422,29 +497,50 @@ const explore=Vue.component('explore',{
  
  const my_profile =Vue.component('my_profile',{
      template:`
-     <div class="d-flex justify-content-center">
-     <div class="jumbotron">
-     <div class="d-flex justify-content-center">
-        <div class="p-2 bg"> 
-        <img class="img-thumbnail" v-bind:src="'static/uploads/' + user_info.profile_picture" style="width:250px;height:250px;"/>
-        </div>
-        <div class="p-2 bg">
-        <h5>{{user_info.firstname}} {{user_info.lastname}}</h5>
-        <p>member since {{user_info.join_on}}</p>
-        <p>{{user_info.biography}} </p>  
-        <div>
+     
+     <div>
+    <div class="d-flex justify-content-center m-3">
+                        <div class="card p-3 personal-card " >
+    
+                            <div class="personal-flex">
+                                <div class="personal-pic">
+                                    <img v-bind:src="'/static/uploads/' + user_info.profile_picture" alt="">
+                                </div>
+                                <div>
+                                    <h3 >{{user_info.firstname}} {{user_info.lastname}}</h3>
+                                    <p>member since {{user_info.join_on}}.</p>
+                                    <p> {{ user_info.location }}</p>
+                                    <p> {{user_info.biography}}  </p>
         
+                                </div>
+                                <div >
+                                   <!--<div class="d-flex justify-content-center " >
+                                        <div class="m-2 d-flex justify-content-center flex-column">
+                                            <p class="text-center">6</p>
+                                            <p class="text-muted">Post</p>
+                                        </div>
+                                        <div class="m-2 d-flex justify-content-center flex-column">
+                                            <p class="text-center">{{user_info.followers}}</p>
+                                            <p class="text-muted">followers</p>
+                                        </div>
+                                    </div>-->
+                                    
+                                </div>
+                            </div>
+    
+                        </div>
+                    </div>
+                <div class="grid m-3" >
         
-        </div>
-        </div> 
+            
+                    <div class="wrap" v-for= "i in pics">
+                         <img class="imgs" v-bind:src="'/static/photos/' + i.pic" />
+                     </div>
+            
         
-        </div> 
-        <div v-for= "i in pics" class="card">
-        <img  class="card-img-top" v-bind:src="'static/photos/' + i.pic"/>
-        
+                </div>
         </div>
-        </div>
-     </div>
+    
      `,
      created:function(){
          let self=this 
@@ -469,7 +565,8 @@ const explore=Vue.component('explore',{
      }
  }) 
  const profile =Vue.component('profile',{
-     template:` 
+     template:` <!--
+     <div>
      <div class="d-flex justify-content-center">
      <div class="jumbotron">
      <div class="d-flex justify-content-center">
@@ -488,15 +585,79 @@ const explore=Vue.component('explore',{
         <div v-for= "i in posts" class="card">
         <img  class="card-img-top" v-bind:src="'../static/photos/' + i.pic"/>
         
+        </div> 
+        
+        
         </div>
-        </div>
+        
      </div>
+     
+     
+            <div class="grid" >
+        
+            
+               <div class="wrap" v-for= "i in posts">
+                  <img class="imgs" v-bind:src="'../static/photos/' + i.pic" />
+               </div>
+            
+        
+            </div>
+    </div> -->
+    
+   
+    <div>
+    <div class="d-flex justify-content-center m-3">
+                        <div class="card p-3 personal-card " >
+    
+                            <div class="personal-flex">
+                                <div class="personal-pic">
+                                    <img v-bind:src="'../static/uploads/' + user_info.profile_picture" alt="">
+                                </div>
+                                <div>
+                                    <h3 >{{user_info.firstname}} {{user_info.lastname}}</h3>
+                                    <p>member since {{user_info.joined_on}}.</p>
+                                    <p> {{ user_info.location }}</p>
+                                    <p> {{user_info.biography}}  </p>
+        
+                                </div>
+                                <div >
+                                    <div class="d-flex justify-content-center " >
+                                        <div class="m-2 d-flex justify-content-center flex-column">
+                                            <p class="text-center">6</p>
+                                            <p class="text-muted">Post</p>
+                                        </div>
+                                        <div class="m-2 d-flex justify-content-center flex-column">
+                                            <p class="text-center">{{user_info.followers}}</p>
+                                            <p class="text-muted">followers</p>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <button class="btn btn-primary px-5" v-bind:class="{ 'btn-primary' :true, 'btn-success': follower }" v-on:click="follow" >{{ followtext  }}</button>
+                                    </div>
+                                </div>
+                            </div>
+    
+                        </div>
+                    </div>
+                <div class="grid m-3" >
+        
+            
+                    <div class="wrap" v-for= "i in posts">
+                         <img class="imgs" v-bind:src="'../static/photos/' + i.pic" />
+                     </div>
+            
+        
+                </div>
+        </div>
+      
      `,
      data:function(){
          return{
              id:this.$route.params.user_id,
              user_info:{},
-             posts:[]
+             posts:[],
+             follower: false,
+             followtext: 'Follow'
              
          }
      },
@@ -526,7 +687,7 @@ const explore=Vue.component('explore',{
      },
      methods:{ 
          follow:function(){
-            let self=this  
+            let self=this  ;
             
            fetch("/api/users/"+self.id+"/follow",{
                  method: 'POST', 
@@ -541,8 +702,13 @@ const explore=Vue.component('explore',{
              .then(function(jsonResponse){
                  let information=jsonResponse
                  console.log(information)
+                 self.follower = true;
+                 self.followtext = 'Following';
                  
-                 self.user_info.followers=information.followers
+                 self.user_info.followers=information.followers 
+                 let change="green"
+                 document.getElementById('follow').classList.add(change);
+                 
                   
                
              })
