@@ -2,7 +2,7 @@
 Vue.component('app-header', {
     template: `
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
-      <a class="navbar-brand" href="/">Photogram</a>
+      <a class="navbar-brand" href="/"><i class="fa fa-instagram" style="font-size:24px">Photogram</i></a>
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
@@ -328,7 +328,7 @@ const register=Vue.component('register',{
                  let information=jsonResponse
                  console.log(information); 
                 // this.$router.push("/") 
-                console.log(current_user) 
+                //console.log(current_user) 
                 //this.$router.push("/login")
              })
              .catch(function(error){
@@ -470,7 +470,27 @@ const explore=Vue.component('explore',{
  }) 
  const profile =Vue.component('profile',{
      template:` 
-     <p>{{id}}</p>
+     <div class="d-flex justify-content-center">
+     <div class="jumbotron">
+     <div class="d-flex justify-content-center">
+        <div class="p-2 bg"> 
+        <img class="img-thumbnail" v-bind:src="'../static/uploads/' + user_info.profile_picture" style="width:250px;height:250px;"/>
+        </div>
+        <div class="p-2 bg">
+        <h5>{{user_info.firstname}} {{user_info.lastname}}</h5>
+        <p>member since {{user_info.joined_on}}</p>
+        <p>{{user_info.biography}} </p>
+        <p>followers:{{user_info.followers}}</p>
+        <button id="follow" class="btn btn-primary" v-on:click="follow" >Follow</button>
+        </div> 
+        
+        </div> 
+        <div v-for= "i in posts" class="card">
+        <img  class="card-img-top" v-bind:src="'../static/photos/' + i.pic"/>
+        
+        </div>
+        </div>
+     </div>
      `,
      data:function(){
          return{
@@ -498,12 +518,40 @@ const explore=Vue.component('explore',{
          }) 
          .then(function(data2){
              console.log(data2) 
-             //self.posts=data.posts
+             self.user_info=data2
              
          })
          
          
      },
+     methods:{ 
+         follow:function(){
+            let self=this  
+            
+           fetch("/api/users/"+self.id+"/follow",{
+                 method: 'POST', 
+                 headers:{ 
+                     'X-CSRFToken':token
+                     }, 
+                    credentials:'same-origin'
+             }) 
+             .then(function (response){
+                 return response.json();
+             }) 
+             .then(function(jsonResponse){
+                 let information=jsonResponse
+                 console.log(information)
+                 
+                 self.user_info.followers=information.followers
+                  
+               
+             })
+             .catch(function(error){
+                console.log(error) 
+             })
+         }
+         
+     }
  })
 
 const NotFound = Vue.component('not-found', {

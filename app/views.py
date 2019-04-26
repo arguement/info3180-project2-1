@@ -129,19 +129,23 @@ def get_id():
 
 @app.route("/api/userinfo/<user_id>")
 @login_required 
-def get_allpost(user_id): 
-    info= users.query.filter_by(id=user_id)
+def get_allpost(user_id):
+    l=[]
+    info= users.query.filter_by(id=user_id) 
+    follow=Followers.query.filter_by(user_id=user_id)
+    print(follow) 
+    for t in follow:
+        l.append(t.id) 
+    num=len(l)
     for i in info:
          username=i.username
-         #password=db.Column(db.String(200))
-         #firstname=db.Column(db.String(80))
-         #lastname=db.Column(db.String(80))
-         #email=db.Column(db.String(80))
-         #location=db.Column(db.String(80))
-         #biography=db.Column(db.String(2000)) 
-         #profile_picture=db.Column(db.String(100)) 
-         #joined_on=db.Column(db.Date)
-    return jsonify({"name":username})
+         firstname=i.firstname
+         lastname=i.lastname
+         location=i.location
+         biography=i.biography 
+         profile_picture=i.profile_picture 
+         joined_on=i.joined_on
+    return jsonify({"name":username,"firstname":firstname,"lastname":lastname,"location":location,"biography":biography,"profile_picture":profile_picture,"joined_on":joined_on,"followers":num})
     
 
 
@@ -220,3 +224,19 @@ def like(post_id):
     print(num2)
     return jsonify({"message":"Post liked!","likes":num2}) 
 
+@app.route("/api/users/<user_id>/follow",methods=['POST'])
+@login_required 
+def follow(user_id): 
+    follower_id=current_user.id 
+    newfollow=Followers(user_id,follower_id) 
+    db.session.add(newfollow)
+    db.session.commit() 
+    follow= Followers.query.filter_by(user_id=user_id) 
+    num=[]
+    print(follow) 
+    for i in follow:
+        num.append(i.user_id)
+    num2=len(num)
+    print(num2)
+    return jsonify({"message":"you have followed them yeahhhhhhhhhhhhh","followers":num2}) 
+    
