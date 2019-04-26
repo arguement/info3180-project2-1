@@ -48,7 +48,7 @@ const Home = Vue.component('home', {
         </div>
         <div class="p-2 bg">
         <h1>Photogram</h1> 
-        <p>share your photos here soyou can hype on how much of a basic bitch you are cool</p>  
+        <p>share photos of your favourite moments with friends,family and the world</p>  
         <div>
         <button id="register" class="btn btn-success" v-on:click="nextpage1" >Register</button> 
         <button id="login" class="btn btn-primary" v-on:click="nextpage2">Login</button>
@@ -394,7 +394,6 @@ const explore=Vue.component('explore',{
     
      <div class="d-flex justify-content-center">
                 <div class="left-section">
-
                         <div class="card posts"  v-for="(i,index) in posts"  :key="index">
                                <div class="top " v-on:click="profile(index)">
                                     <p class="text-muted lead" v-on:click="profile(index)"> 
@@ -403,9 +402,7 @@ const explore=Vue.component('explore',{
                                     </p>
                                </div>
                                <div class="middle">
-
                                 <img :src="'static/photos/' + i.photo " alt="">
-
                                </div>
                                <div class="bottom">
                                     <p id="caption" :value=i.caption>{{ i.caption}}</p>
@@ -416,7 +413,6 @@ const explore=Vue.component('explore',{
                                                 <div  v-on:click="like_post(index)" class="post-header-of-username" id="liker"> <img src="static/images/like.png"  alt=""> </div> 
                                                 {{ i.likes }} likes
                                         </div>
-
                                         <div class="col">
                                             <p >
                                                 {{i.created_on}} {{index}}
@@ -425,12 +421,9 @@ const explore=Vue.component('explore',{
                                     </div>
                                </div>
                          </div>
-
                 </div>
                 <div class="right-section">
-
                     <button id="upload" class="btn btn-primary" v-on:click="nextpage1" >New Post</button>
-
                 </div>
             </div>
         `,data:function(){ 
@@ -620,10 +613,10 @@ const explore=Vue.component('explore',{
                                     <p> {{user_info.biography}}  </p>
         
                                 </div>
-                                <div >
+                                <div >+
                                     <div class="d-flex justify-content-center " >
                                         <div class="m-2 d-flex justify-content-center flex-column">
-                                            <p class="text-center">6</p>
+                                            <p class="text-center">{{total}}</p>
                                             <p class="text-muted">Post</p>
                                         </div>
                                         <div class="m-2 d-flex justify-content-center flex-column">
@@ -657,7 +650,8 @@ const explore=Vue.component('explore',{
              user_info:{},
              posts:[],
              follower: false,
-             followtext: 'Follow'
+             followtext: 'Follow', 
+             total:0
              
          }
      },
@@ -669,7 +663,8 @@ const explore=Vue.component('explore',{
          }) 
          .then(function(data){
              console.log(data) 
-             self.posts=data.posts
+             self.posts=data.posts 
+             self.total=self.posts.length;
              
          })
          
