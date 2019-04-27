@@ -11,7 +11,7 @@ Flask-Migrate
 Flask-Script
 Flask-Login
 psycopg2
-
+gunicorn
 PyJWT==1.4.2 
 Flask-JWT==0.3.2 
 
