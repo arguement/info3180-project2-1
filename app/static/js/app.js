@@ -249,7 +249,7 @@ const newpost= Vue.component('newpost',{
                  if (information.message == "the post was made sucess fully"){
                      console.log("in here")
                     self.$router.push("/explore") 
-                    this.flashMessage.show({status: 'error', title: 'Error Message Title', message: 'Oh, you broke my heart! Shame on you!'})
+                    //this.flashMessage.show({status: 'error', title: 'Error Message Title', message: 'Oh, you broke my heart! Shame on you!'})
                  }
                  
                  
@@ -360,6 +360,7 @@ const register=Vue.component('register',{
     `,
     methods:{ 
         registerperson:function(){
+            let self=this
             let registerform= document.getElementById("registerform") 
             let form_date = new FormData(registerform) 
              fetch("/api/users/register",{
@@ -378,7 +379,8 @@ const register=Vue.component('register',{
                  console.log(information); 
                 // this.$router.push("/") 
                 //console.log(current_user) 
-                //this.$router.push("/login")
+                console.log("in here")
+                self.$router.push("/login")
              })
              .catch(function(error){
                 console.log(error) 
@@ -397,7 +399,7 @@ const explore=Vue.component('explore',{
                         <div class="card posts"  v-for="(i,index) in posts"  :key="index">
                                <div class="top " v-on:click="profile(index)">
                                     <p class="text-muted lead" v-on:click="profile(index)"> 
-                                        <div v-on:click="profile(index)" class="post-header-of-username"> <img src="static/images/man.png" alt=""> </div> 
+                                        <div v-on:click="profile(index)" class="post-header-of-username"> <img class=".img-circle" v-bind:src="'/static/uploads/' + i.pp" alt=""  > </div> 
                                         <span>{{ i.username }}</span>
                                     </p>
                                </div>
@@ -613,7 +615,7 @@ const explore=Vue.component('explore',{
                                     <p> {{user_info.biography}}  </p>
         
                                 </div>
-                                <div >+
+                                <div >
                                     <div class="d-flex justify-content-center " >
                                         <div class="m-2 d-flex justify-content-center flex-column">
                                             <p class="text-center">{{total}}</p>

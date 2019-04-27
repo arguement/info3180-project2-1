@@ -238,9 +238,8 @@ def allposts():
         for t in totallikes:
             total.append(t.post_id)
         alllikes=len(total)
-        name = users.query.get(i.user_id).username 
-        pp = users.query.get(i.user_id).profile_picture
-        dic={"user_id":i.user_id,"id":i.id,"caption":i.caption,"photo":i.photo,"created_on":i.created_on,"likes":alllikes,"username":name,"pp":pp}
+        name = users.query.get(i.user_id).username
+        dic={"user_id":i.user_id,"id":i.id,"caption":i.caption,"photo":i.photo,"created_on":i.created_on,"likes":alllikes,"username":name,}
         theposts.append(dic)
         #print(dic)
     return jsonify({"posts":theposts}) 
